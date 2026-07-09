@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compound Interest Calculator with Contributions | Simple Retirement Calculators</title>
+<meta name="description" content="Free compound interest calculator with monthly or annual contributions. See your final balance, total growth, and a chart of contributions vs. compound growth.">
+<link rel="canonical" href="https://simpleretirementcalculators.com/compound-interest-calculator.html">
+<link rel="stylesheet" href="styles.css">
+<!-- AdSense verification/ad code goes here -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="site-name" href="/">Simple<span>Retirement</span>Calculators</a>
+    <nav>
+      <a href="/">Retirement Number</a>
+      <a href="when-can-i-retire.html">When Can I Retire?</a>
+      <a href="compound-interest-calculator.html" class="active">Compound Interest</a>
+      <a href="retirement-drawdown-calculator.html">Drawdown</a>
+      <a href="coast-fire-calculator.html">Coast FIRE</a>
+      <a href="four-percent-rule.html">4% Rule</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="eyebrow">Growth Over Time</div>
+  <h1>Compound Interest Calculator</h1>
+  <p class="intro">See how a starting balance plus regular contributions grows over time. The chart splits your final balance into money you put in and money compounding earned for you.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div><label for="start">Starting balance ($)</label><input type="number" id="start" value="10000" min="0" step="500"></div>
+      <div><label for="contrib">Contribution amount ($)</label><input type="number" id="contrib" value="500" min="0" step="25"></div>
+      <div>
+        <label for="freq">Contribution frequency</label>
+        <select id="freq" style="width:100%;padding:10px 12px;font-size:1rem;border:1px solid var(--border);border-radius:8px;background:#fff">
+          <option value="12">Monthly</option>
+          <option value="1">Annually</option>
+        </select>
+      </div>
+      <div><label for="rate">Annual interest rate (%)</label><input type="number" id="rate" value="7" min="0" step="0.1"></div>
+      <div><label for="years">Years to grow</label><input type="number" id="years" value="30" min="1" max="80" step="1"></div>
+    </div>
+    <button class="primary" onclick="calc()">Calculate Growth</button>
+  </div>
+
+  <div class="results" id="results">
+    <div class="big-answer">
+      <div class="label">Final balance</div>
+      <div class="value" id="final"></div>
+      <div id="detail" style="margin-top:4px;color:var(--muted);font-size:.9rem"></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="label">Total contributed</div><div class="value" id="contribTotal"></div></div>
+      <div class="stat"><div class="label">Growth from compounding</div><div class="value" id="growth"></div></div>
+      <div class="stat"><div class="label">Growth share of balance</div><div class="value" id="share"></div></div>
+    </div>
+    <div class="card">
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+      <div class="share-row">
+        <button class="ghost" onclick="copyLink()">Copy link to these results</button>
+        <span class="share-msg" id="shareMsg">Link copied</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="explain">
+    <h2>How compound interest works</h2>
+    <p>Compounding means you earn returns not just on the money you put in, but on the returns themselves. In year one, growth comes mostly from your contributions. But each year's gains join the balance and start earning their own gains — and over decades, that snowball usually ends up larger than everything you contributed. That crossover, visible in the chart above, is why starting early matters more than starting big.</p>
+    <p>This calculator compounds monthly, which matches how most investment and savings accounts grow in practice, and applies contributions at the end of each period.</p>
+    <h2>Using it for retirement planning</h2>
+    <p>This is the engine behind retirement projections. To point it at a specific goal, use the <a href="when-can-i-retire.html">when can I retire calculator</a>, which runs the same math against a target number, or find that target first with the <a href="/">retirement number calculator</a>.</p>
+  </section>
+
+  <p class="disclaimer">This tool is for educational purposes only and is not financial advice. Real investment returns vary year to year, and results do not account for taxes, fees, or inflation. Consult a qualified financial professional before making financial decisions.</p>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div>&copy; 2026 SimpleRetirementCalculators.com &middot; A <a href="https://swrltools.com">Swrl Tools</a> site</div>
+    <div><a href="about.html">About</a> &middot; <a href="contact.html">Contact</a></div>
+  </div>
+</footer>
+<script>
+let chart=null;
+const $=id=>document.getElementById(id);
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+const P={start:'s',contrib:'c',freq:'f',rate:'r',years:'y'};
+function calc(pushUrl=true){
+  const start=+$('start').value,contrib=+$('contrib').value,freq=+$('freq').value,
+        r=+$('rate').value/100/12,years=+$('years').value;
+  let bal=start,contributed=start;
+  const balSeries=[bal],contribSeries=[contributed];
+  for(let m=1;m<=years*12;m++){
+    bal*=(1+r);
+    if(freq===12){bal+=contrib;contributed+=contrib;}
+    else if(m%12===0){bal+=contrib;contributed+=contrib;}
+    if(m%12===0){balSeries.push(bal);contribSeries.push(contributed);}
+  }
+  $('final').textContent=fmt(bal);
+  $('detail').textContent='After '+years+' years at '+$('rate').value+'% annual return, compounded monthly.';
+  $('contribTotal').textContent=fmt(contributed);
+  $('growth').textContent=fmt(bal-contributed);
+  $('share').textContent=Math.round((bal-contributed)/bal*100)+'%';
+  $('results').classList.add('show');
+  const labels=balSeries.map((_,i)=>'Yr '+i);
+  const growthSeries=balSeries.map((b,i)=>Math.max(0,b-contribSeries[i]));
+  if(chart)chart.destroy();
+  chart=new Chart($('chart'),{type:'bar',data:{labels,datasets:[
+    {label:'Contributions',data:contribSeries,backgroundColor:'rgba(90,100,114,.55)',stack:'s'},
+    {label:'Compound growth',data:growthSeries,backgroundColor:'rgba(154,107,15,.7)',stack:'s'}
+  ]},options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>'$'+(v/1000)+'k'}}}}});
+  if(pushUrl){
+    const q=new URLSearchParams();
+    for(const[id,k]of Object.entries(P))q.set(k,$(id).value);
+    history.replaceState(null,'','?'+q.toString());
+  }
+}
+function copyLink(){
+  navigator.clipboard.writeText(location.href).then(()=>{
+    $('shareMsg').style.display='inline';
+    setTimeout(()=>$('shareMsg').style.display='none',2000);
+  });
+}
+(function(){
+  const q=new URLSearchParams(location.search);let any=false;
+  for(const[id,k]of Object.entries(P))if(q.has(k)){$(id).value=q.get(k);any=true;}
+  if(any)calc(false);
+})();
+</script>
+</body>
+</html>

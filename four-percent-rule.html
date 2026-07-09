@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The 4% Rule Explained (With Calculator) | Simple Retirement Calculators</title>
+<meta name="description" content="What is the 4% rule for retirement? Plain-English explanation of where it comes from, when it works, its limitations, and a quick calculator to apply it to your numbers.">
+<link rel="canonical" href="https://simpleretirementcalculators.com/four-percent-rule.html">
+<link rel="stylesheet" href="styles.css">
+<!-- AdSense verification/ad code goes here -->
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="site-name" href="/">Simple<span>Retirement</span>Calculators</a>
+    <nav>
+      <a href="/">Retirement Number</a>
+      <a href="when-can-i-retire.html">When Can I Retire?</a>
+      <a href="compound-interest-calculator.html">Compound Interest</a>
+      <a href="retirement-drawdown-calculator.html">Drawdown</a>
+      <a href="coast-fire-calculator.html">Coast FIRE</a>
+      <a href="four-percent-rule.html" class="active">4% Rule</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="eyebrow">The Classic Guideline</div>
+  <h1>The 4% Rule, Explained</h1>
+  <p class="intro">The 4% rule is the most-cited guideline in retirement planning. Here's what it actually says, where it came from, when it holds up, and a quick calculator to apply it to your own numbers.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div><label for="nest">Your nest egg ($)</label><input type="number" id="nest" value="1000000" min="0" step="10000"></div>
+    </div>
+    <button class="primary" onclick="calc()">Apply the 4% Rule</button>
+    <div class="results" id="results" style="margin-top:18px">
+      <div class="stat-row" style="margin-bottom:0">
+        <div class="stat"><div class="label">Year-one withdrawal (4%)</div><div class="value" id="annual"></div></div>
+        <div class="stat"><div class="label">Monthly income</div><div class="value" id="monthly"></div></div>
+        <div class="stat"><div class="label">Conservative (3.5%)</div><div class="value" id="cons"></div></div>
+      </div>
+      <div class="share-row" style="margin-top:14px">
+        <button class="ghost" onclick="copyLink()">Copy link to these results</button>
+        <span class="share-msg" id="shareMsg">Link copied</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="explain">
+    <h2>What the rule says</h2>
+    <p>In your first year of retirement, withdraw 4% of your portfolio. Every year after, withdraw the same dollar amount adjusted for inflation — regardless of what the market does. Based on historical U.S. market data, a diversified portfolio following this plan has survived at least 30 years in every historical period tested, including retirements that started right before major crashes.</p>
+    <h2>Where it comes from</h2>
+    <p>The rule originates from financial planner William Bengen's 1994 research, later reinforced by the "Trinity Study" from three Trinity University professors. Both worked backward through decades of market history asking: what's the highest starting withdrawal rate that never exhausted a portfolio over a 30-year retirement? The answer landed around 4% for portfolios of roughly half stocks, half bonds.</p>
+    <h2>Flipping it around: the 25&times; rule</h2>
+    <p>The 4% rule is more often used in reverse, to set a savings target. If you can safely withdraw 4% a year, then you need 25 times your desired annual portfolio income saved. Want $40,000 a year from your investments? Target $1,000,000. That's exactly what our <a href="/">retirement number calculator</a> computes, including adjustments for Social Security or pension income.</p>
+    <h2>Limitations worth knowing</h2>
+    <p>It's a guideline built on U.S. historical data, not a law of nature. It assumed a 30-year retirement (early retirees may want a lower rate — see the <a href="coast-fire-calculator.html">Coast FIRE calculator</a> crowd's preference for 3.25%&ndash;3.5%), it ignores taxes and investment fees, and it assumes you'd never adjust spending in a bad market, which real retirees almost always do. Some researchers argue that flexibility makes rates above 4% workable; others argue lower future returns justify less. Test your own plan's endurance with the <a href="retirement-drawdown-calculator.html">drawdown calculator</a>.</p>
+  </section>
+
+  <p class="disclaimer">This page is for educational purposes only and is not financial advice. The 4% rule is a historical guideline, not a guarantee of future results. Consult a qualified financial professional before making retirement decisions.</p>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div>&copy; 2026 SimpleRetirementCalculators.com &middot; A <a href="https://swrltools.com">Swrl Tools</a> site</div>
+    <div><a href="about.html">About</a> &middot; <a href="contact.html">Contact</a></div>
+  </div>
+</footer>
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+function calc(pushUrl=true){
+  const nest=+$('nest').value;
+  $('annual').textContent=fmt(nest*0.04);
+  $('monthly').textContent=fmt(nest*0.04/12);
+  $('cons').textContent=fmt(nest*0.035);
+  $('results').classList.add('show');
+  if(pushUrl)history.replaceState(null,'','?n='+nest);
+}
+function copyLink(){
+  navigator.clipboard.writeText(location.href).then(()=>{
+    $('shareMsg').style.display='inline';
+    setTimeout(()=>$('shareMsg').style.display='none',2000);
+  });
+}
+(function(){
+  const q=new URLSearchParams(location.search);
+  if(q.has('n')){$('nest').value=q.get('n');calc(false);}
+})();
+</script>
+</body>
+</html>

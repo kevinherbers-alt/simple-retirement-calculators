@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retirement Number Calculator - How Much Do I Need to Retire? | Simple Retirement Calculators</title>
+<meta name="description" content="How much money do you need to retire? This free retirement number calculator uses the 4% rule with an adjustable withdrawal rate to find your target nest egg.">
+<link rel="canonical" href="https://simpleretirementcalculators.com/">
+<link rel="stylesheet" href="styles.css">
+<!-- AdSense verification/ad code goes here -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="site-name" href="/">Simple<span>Retirement</span>Calculators</a>
+    <nav>
+      <a href="/" class="active">Retirement Number</a>
+      <a href="when-can-i-retire.html">When Can I Retire?</a>
+      <a href="compound-interest-calculator.html">Compound Interest</a>
+      <a href="retirement-drawdown-calculator.html">Drawdown</a>
+      <a href="coast-fire-calculator.html">Coast FIRE</a>
+      <a href="four-percent-rule.html">4% Rule</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="eyebrow">Your Target Nest Egg</div>
+  <h1>Retirement Number Calculator</h1>
+  <p class="intro">How much do you actually need saved to retire? Enter the annual income you want in retirement, and this calculator finds your target nest egg using the 4% rule — with a slider to see how more conservative or aggressive withdrawal rates move the goalposts.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div><label for="income">Desired annual retirement income ($)</label><input type="number" id="income" value="60000" min="0" step="1000"></div>
+      <div><label for="other">Annual income from other sources ($ — Social Security, pension)</label><input type="number" id="other" value="20000" min="0" step="500"></div>
+      <div>
+        <label for="rate">Withdrawal rate: <span id="rateLabel">4.0</span>%</label>
+        <input type="range" id="rate" min="3" max="5" step="0.1" value="4" style="width:100%" oninput="document.getElementById('rateLabel').textContent=(+this.value).toFixed(1)">
+      </div>
+    </div>
+    <button class="primary" onclick="calc()">Find My Number</button>
+  </div>
+
+  <div class="results" id="results">
+    <div class="big-answer">
+      <div class="label">Your retirement number</div>
+      <div class="value" id="number"></div>
+      <div id="detail" style="margin-top:4px;color:var(--muted);font-size:.9rem"></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="label">Portfolio must cover / year</div><div class="value" id="gap"></div></div>
+      <div class="stat"><div class="label">At 3% (conservative)</div><div class="value" id="n3"></div></div>
+      <div class="stat"><div class="label">At 4% (classic rule)</div><div class="value" id="n4"></div></div>
+      <div class="stat"><div class="label">At 5% (aggressive)</div><div class="value" id="n5"></div></div>
+    </div>
+    <div class="card">
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+      <div class="share-row">
+        <button class="ghost" onclick="copyLink()">Copy link to these results</button>
+        <span class="share-msg" id="shareMsg">Link copied</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="explain">
+    <h2>How your retirement number is calculated</h2>
+    <p>The math is simple: take the annual income your portfolio needs to produce (your desired income minus Social Security, pensions, or other income), and divide by your withdrawal rate. At the classic 4% rate, that works out to 25&times; your annual portfolio income need. Want $40,000 a year from your portfolio? Your number is $1,000,000.</p>
+    <p>The withdrawal rate is the big assumption. The <a href="four-percent-rule.html">4% rule</a> comes from research on how much retirees could withdraw annually (adjusted for inflation) from a diversified portfolio without running out of money over 30 years. A lower rate like 3% builds in more safety and suits earlier retirements; a higher rate like 5% assumes flexibility or a shorter retirement.</p>
+    <h2>Next steps</h2>
+    <p>Once you know your number, find out when you'll reach it with the <a href="when-can-i-retire.html">when can I retire calculator</a>, or check whether your current savings could coast there on growth alone with the <a href="coast-fire-calculator.html">Coast FIRE calculator</a>. Already retired or close? Test how long your nest egg lasts with the <a href="retirement-drawdown-calculator.html">drawdown calculator</a>.</p>
+  </section>
+
+  <p class="disclaimer">This tool is for educational purposes only and is not financial advice. The 4% rule is a historical guideline, not a guarantee, and results do not account for taxes, fees, or market variability. Consult a qualified financial professional before making retirement decisions.</p>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div>&copy; 2026 SimpleRetirementCalculators.com &middot; A <a href="https://swrltools.com">Swrl Tools</a> site</div>
+    <div><a href="about.html">About</a> &middot; <a href="contact.html">Contact</a></div>
+  </div>
+</footer>
+<script>
+let chart=null;
+const $=id=>document.getElementById(id);
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+const P={income:'i',other:'o',rate:'w'};
+function calc(pushUrl=true){
+  const income=+$('income').value,other=+$('other').value,rate=+$('rate').value/100;
+  const gap=Math.max(0,income-other);
+  const num=rate>0?gap/rate:0;
+  $('number').textContent=fmt(num);
+  $('detail').textContent='Supports '+fmt(gap)+'/year from your portfolio at a '+(+$('rate').value).toFixed(1)+'% withdrawal rate ('+Math.round(1/rate)+'\u00d7 annual need).';
+  $('gap').textContent=fmt(gap);
+  $('n3').textContent=fmt(gap/0.03);
+  $('n4').textContent=fmt(gap/0.04);
+  $('n5').textContent=fmt(gap/0.05);
+  $('results').classList.add('show');
+  const rates=[],nums=[];
+  for(let r=3;r<=5.001;r+=0.25){rates.push(r.toFixed(2)+'%');nums.push(gap/(r/100));}
+  if(chart)chart.destroy();
+  chart=new Chart($('chart'),{type:'bar',data:{labels:rates,datasets:[
+    {label:'Nest egg needed by withdrawal rate',data:nums,backgroundColor:'rgba(154,107,15,.65)'}
+  ]},options:{maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>'$'+(v/1000000).toFixed(1)+'M'}}}}});
+  if(pushUrl){
+    const q=new URLSearchParams();
+    for(const[id,k]of Object.entries(P))q.set(k,$(id).value);
+    history.replaceState(null,'','?'+q.toString());
+  }
+}
+function copyLink(){
+  navigator.clipboard.writeText(location.href).then(()=>{
+    $('shareMsg').style.display='inline';
+    setTimeout(()=>$('shareMsg').style.display='none',2000);
+  });
+}
+(function(){
+  const q=new URLSearchParams(location.search);let any=false;
+  for(const[id,k]of Object.entries(P))if(q.has(k)){$(id).value=q.get(k);any=true;}
+  $('rateLabel').textContent=(+$('rate').value).toFixed(1);
+  if(any)calc(false);
+})();
+</script>
+</body>
+</html>

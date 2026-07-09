@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coast FIRE Calculator - Have You Already Saved Enough? | Simple Retirement Calculators</title>
+<meta name="description" content="Coast FIRE calculator: find out how much you need saved today so compound growth alone reaches your retirement number by your target age — no more contributions needed.">
+<link rel="canonical" href="https://simpleretirementcalculators.com/coast-fire-calculator.html">
+<link rel="stylesheet" href="styles.css">
+<!-- AdSense verification/ad code goes here -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="site-name" href="/">Simple<span>Retirement</span>Calculators</a>
+    <nav>
+      <a href="/">Retirement Number</a>
+      <a href="when-can-i-retire.html">When Can I Retire?</a>
+      <a href="compound-interest-calculator.html">Compound Interest</a>
+      <a href="retirement-drawdown-calculator.html">Drawdown</a>
+      <a href="coast-fire-calculator.html" class="active">Coast FIRE</a>
+      <a href="four-percent-rule.html">4% Rule</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="eyebrow">Coast to the Finish</div>
+  <h1>Coast FIRE Calculator</h1>
+  <p class="intro">Coast FIRE is the point where your existing savings, left alone to compound, will grow into your full retirement number by retirement age — no further contributions required. Find your Coast FIRE number and see whether you've already passed it.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div><label for="age">Current age</label><input type="number" id="age" value="35" min="16" max="90" step="1"></div>
+      <div><label for="rAge">Target retirement age</label><input type="number" id="rAge" value="65" min="20" max="90" step="1"></div>
+      <div><label for="saved">Current savings ($)</label><input type="number" id="saved" value="200000" min="0" step="1000"></div>
+      <div><label for="target">Retirement number ($)</label><input type="number" id="target" value="1500000" min="1" step="10000"></div>
+      <div><label for="ret">Expected annual return (%)</label><input type="number" id="ret" value="7" min="0" step="0.1"></div>
+    </div>
+    <button class="primary" onclick="calc()">Check My Coast FIRE Status</button>
+  </div>
+
+  <div class="results" id="results">
+    <div class="big-answer">
+      <div class="label" id="statusLabel">Coast FIRE status</div>
+      <div class="value" id="status"></div>
+      <div id="detail" style="margin-top:4px;color:var(--muted);font-size:.9rem"></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="label">Coast FIRE number (needed today)</div><div class="value" id="coastNum"></div></div>
+      <div class="stat"><div class="label">Your current savings</div><div class="value" id="current"></div></div>
+      <div class="stat"><div class="label">Projected balance at retirement</div><div class="value" id="projected"></div></div>
+    </div>
+    <div class="card">
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+      <div class="share-row">
+        <button class="ghost" onclick="copyLink()">Copy link to these results</button>
+        <span class="share-msg" id="shareMsg">Link copied</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="explain">
+    <h2>How the Coast FIRE number is calculated</h2>
+    <p>Your Coast FIRE number is your retirement target discounted back to today at your expected return: target &divide; (1 + return)<sup>years until retirement</sup>. If your current savings meet or exceed that amount, compounding alone should carry you to your goal — you could stop contributing and just cover your living expenses until retirement.</p>
+    <p>Reaching Coast FIRE doesn't mean you should stop saving — it means you've bought flexibility. A lower-stress job, a career change, or a sabbatical becomes financially survivable because your retirement is already "handled" by your existing portfolio.</p>
+    <h2>Related tools</h2>
+    <p>Not sure what retirement number to use? Start with the <a href="/">retirement number calculator</a>. If you plan to keep contributing, the <a href="when-can-i-retire.html">when can I retire calculator</a> shows how much sooner that gets you there.</p>
+  </section>
+
+  <p class="disclaimer">This tool is for educational purposes only and is not financial advice. Projections assume a constant annual return and do not account for taxes, fees, inflation, or market variability. Consult a qualified financial professional before making retirement decisions.</p>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div>&copy; 2026 SimpleRetirementCalculators.com &middot; A <a href="https://swrltools.com">Swrl Tools</a> site</div>
+    <div><a href="about.html">About</a> &middot; <a href="contact.html">Contact</a></div>
+  </div>
+</footer>
+<script>
+let chart=null;
+const $=id=>document.getElementById(id);
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+const P={age:'a',rAge:'g',saved:'s',target:'t',ret:'r'};
+function calc(pushUrl=true){
+  const age=+$('age').value,rAge=+$('rAge').value,saved=+$('saved').value,
+        target=+$('target').value,r=+$('ret').value/100;
+  if(rAge<=age)return alert('Target retirement age must be greater than current age.');
+  const years=rAge-age;
+  const coastNum=target/Math.pow(1+r,years);
+  const projected=saved*Math.pow(1+r,years);
+  const reached=saved>=coastNum;
+  $('status').textContent=reached?'You\u2019ve reached Coast FIRE':'Not yet \u2014 '+fmt(coastNum-saved)+' to go';
+  $('detail').textContent=reached
+    ?'Your current savings alone are projected to grow past your '+fmt(target)+' target by age '+rAge+'.'
+    :'You need '+fmt(coastNum)+' saved today for growth alone to reach '+fmt(target)+' by age '+rAge+'.';
+  $('coastNum').textContent=fmt(coastNum);
+  $('current').textContent=fmt(saved);
+  $('projected').textContent=fmt(projected);
+  $('results').classList.add('show');
+  const labels=[],yours=[],needed=[];
+  for(let i=0;i<=years;i++){
+    labels.push('Age '+(age+i));
+    yours.push(saved*Math.pow(1+r,i));
+    needed.push(coastNum*Math.pow(1+r,i));
+  }
+  if(chart)chart.destroy();
+  chart=new Chart($('chart'),{type:'line',data:{labels,datasets:[
+    {label:'Your savings (no new contributions)',data:yours,borderColor:'#9a6b0f',backgroundColor:'rgba(154,107,15,.1)',fill:true,tension:.2},
+    {label:'Coast FIRE track to target',data:needed,borderColor:'#8a93a3',borderDash:[6,4],tension:.2}
+  ]},options:{maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>'$'+(v/1000)+'k'}}}}});
+  if(pushUrl){
+    const q=new URLSearchParams();
+    for(const[id,k]of Object.entries(P))q.set(k,$(id).value);
+    history.replaceState(null,'','?'+q.toString());
+  }
+}
+function copyLink(){
+  navigator.clipboard.writeText(location.href).then(()=>{
+    $('shareMsg').style.display='inline';
+    setTimeout(()=>$('shareMsg').style.display='none',2000);
+  });
+}
+(function(){
+  const q=new URLSearchParams(location.search);let any=false;
+  for(const[id,k]of Object.entries(P))if(q.has(k)){$(id).value=q.get(k);any=true;}
+  if(any)calc(false);
+})();
+</script>
+</body>
+</html>

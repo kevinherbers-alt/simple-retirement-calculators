@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retirement Drawdown Calculator - How Long Will My Money Last? | Simple Retirement Calculators</title>
+<meta name="description" content="How long will your retirement savings last? Enter your nest egg, annual withdrawal, and expected return to see your money's lifespan with a declining balance chart.">
+<link rel="canonical" href="https://simpleretirementcalculators.com/retirement-drawdown-calculator.html">
+<link rel="stylesheet" href="styles.css">
+<!-- AdSense verification/ad code goes here -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="site-name" href="/">Simple<span>Retirement</span>Calculators</a>
+    <nav>
+      <a href="/">Retirement Number</a>
+      <a href="when-can-i-retire.html">When Can I Retire?</a>
+      <a href="compound-interest-calculator.html">Compound Interest</a>
+      <a href="retirement-drawdown-calculator.html" class="active">Drawdown</a>
+      <a href="coast-fire-calculator.html">Coast FIRE</a>
+      <a href="four-percent-rule.html">4% Rule</a>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="eyebrow">Making It Last</div>
+  <h1>Retirement Drawdown Calculator</h1>
+  <p class="intro">The other side of retirement math: you've saved a nest egg — now how long will it last? Enter your balance, annual withdrawal, and expected return to see your money's lifespan, with optional inflation adjustment.</p>
+
+  <div class="card">
+    <div class="grid">
+      <div><label for="nest">Nest egg at retirement ($)</label><input type="number" id="nest" value="1000000" min="0" step="10000"></div>
+      <div><label for="withdraw">Annual withdrawal ($)</label><input type="number" id="withdraw" value="45000" min="1" step="1000"></div>
+      <div><label for="ret">Expected annual return in retirement (%)</label><input type="number" id="ret" value="5" min="0" step="0.1"></div>
+      <div><label for="infl">Annual inflation adjustment to withdrawals (%)</label><input type="number" id="infl" value="2.5" min="0" step="0.1"></div>
+    </div>
+    <button class="primary" onclick="calc()">See How Long It Lasts</button>
+  </div>
+
+  <div class="results" id="results">
+    <div class="big-answer">
+      <div class="label">Your money lasts</div>
+      <div class="value" id="lasts"></div>
+      <div id="detail" style="margin-top:4px;color:var(--muted);font-size:.9rem"></div>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="label">Runs out in year</div><div class="value" id="outYear"></div></div>
+      <div class="stat"><div class="label">Total withdrawn</div><div class="value" id="totalW"></div></div>
+      <div class="stat"><div class="label">Initial withdrawal rate</div><div class="value" id="wRate"></div></div>
+    </div>
+    <div class="card">
+      <div class="chart-wrap"><canvas id="chart"></canvas></div>
+      <div class="share-row">
+        <button class="ghost" onclick="copyLink()">Copy link to these results</button>
+        <span class="share-msg" id="shareMsg">Link copied</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="explain">
+    <h2>How the drawdown projection works</h2>
+    <p>Each year, your balance grows by your expected return, then your annual withdrawal is taken out. If you set an inflation adjustment, the withdrawal increases by that percentage every year to preserve your purchasing power — which is how the original 4% rule research modeled spending. The calculator runs until the balance hits zero or 60 years pass, whichever comes first.</p>
+    <p>If your return outpaces your inflation-adjusted withdrawals, the balance can grow forever — the calculator will tell you if your plan is self-sustaining. A common benchmark: at a 4% initial withdrawal rate with a balanced portfolio, savings have historically lasted at least 30 years. See <a href="four-percent-rule.html">the 4% rule explained</a> for the background.</p>
+    <h2>Related tools</h2>
+    <p>Working the problem in the other direction? The <a href="/">retirement number calculator</a> finds the nest egg you'd need for a given income, and the <a href="when-can-i-retire.html">when can I retire calculator</a> projects when you'll get there.</p>
+  </section>
+
+  <p class="disclaimer">This tool is for educational purposes only and is not financial advice. Real returns vary year to year, and the order of good and bad years (sequence-of-returns risk) matters in ways a constant-return model cannot capture. Consult a qualified financial professional before making retirement decisions.</p>
+</main>
+<footer>
+  <div class="footer-inner">
+    <div>&copy; 2026 SimpleRetirementCalculators.com &middot; A <a href="https://swrltools.com">Swrl Tools</a> site</div>
+    <div><a href="about.html">About</a> &middot; <a href="contact.html">Contact</a></div>
+  </div>
+</footer>
+<script>
+let chart=null;
+const $=id=>document.getElementById(id);
+const fmt=n=>'$'+Math.round(n).toLocaleString();
+const P={nest:'n',withdraw:'w',ret:'r',infl:'i'};
+function calc(pushUrl=true){
+  let bal=+$('nest').value;
+  const r=+$('ret').value/100,infl=+$('infl').value/100,startW=+$('withdraw').value;
+  let w=startW,years=0,total=0;
+  const series=[bal];
+  while(bal>0&&years<60){
+    years++;
+    bal*=(1+r);
+    const take=Math.min(w,bal);
+    total+=take;bal-=take;
+    w*=(1+infl);
+    series.push(bal);
+  }
+  const forever=bal>0;
+  $('lasts').textContent=forever?'60+ years':(years+' year'+(years===1?'':'s'));
+  $('detail').textContent=forever?'Your plan is self-sustaining over this horizon — growth keeps pace with withdrawals.':'Balance reaches zero after '+years+' years of inflation-adjusted withdrawals.';
+  $('outYear').textContent=forever?'Not within 60 yrs':String(new Date().getFullYear()+years);
+  $('totalW').textContent=fmt(total);
+  $('wRate').textContent=(startW/+$('nest').value*100).toFixed(1)+'%';
+  $('results').classList.add('show');
+  const labels=series.map((_,i)=>'Yr '+i);
+  if(chart)chart.destroy();
+  chart=new Chart($('chart'),{type:'line',data:{labels,datasets:[
+    {label:'Remaining balance',data:series,borderColor:'#9a6b0f',backgroundColor:'rgba(154,107,15,.1)',fill:true,tension:.2}
+  ]},options:{maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>'$'+(v/1000)+'k'}}}}});
+  if(pushUrl){
+    const q=new URLSearchParams();
+    for(const[id,k]of Object.entries(P))q.set(k,$(id).value);
+    history.replaceState(null,'','?'+q.toString());
+  }
+}
+function copyLink(){
+  navigator.clipboard.writeText(location.href).then(()=>{
+    $('shareMsg').style.display='inline';
+    setTimeout(()=>$('shareMsg').style.display='none',2000);
+  });
+}
+(function(){
+  const q=new URLSearchParams(location.search);let any=false;
+  for(const[id,k]of Object.entries(P))if(q.has(k)){$(id).value=q.get(k);any=true;}
+  if(any)calc(false);
+})();
+</script>
+</body>
+</html>
