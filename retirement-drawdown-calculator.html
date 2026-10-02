@@ -11,18 +11,53 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7138011475350254"
      crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+nav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+nav > a { color: var(--muted); text-decoration: none; font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; }
+nav > a:hover, nav > a.active { color: var(--accent); }
+nav > a.cta { color: var(--accent); font-weight: 600; }
+nav > a.cta:hover { background: var(--accent-light); }
+.dropdown { position: relative; }
+.dropdown-btn { color: var(--muted); font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; cursor: pointer; background: none; border: none; font-family: inherit; display: flex; align-items: center; gap: 3px; white-space: nowrap; }
+.dropdown-btn:hover { color: var(--accent); }
+.dropdown-btn::after { content: '▾'; font-size: 0.65rem; opacity: 0.7; }
+.dropdown-menu { display: none; position: absolute; top: calc(100% + 4px); left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-width: 220px; z-index: 200; padding: 6px; }
+.dropdown-menu a { display: block; padding: 8px 12px; color: var(--text); text-decoration: none; font-size: 0.84rem; border-radius: 6px; white-space: nowrap; }
+.dropdown-menu a:hover { background: var(--accent-light); color: var(--accent); }
+.dropdown:hover .dropdown-menu { display: block; }
+@media (max-width: 620px) {
+  .dropdown-menu { position: fixed; left: 8px; right: 8px; width: auto; min-width: 0; }
+}</style>
 </head>
 <body>
 <header>
   <div class="header-inner">
     <a class="site-name" href="/">Simple<span>Retirement</span>Calculators</a>
     <nav>
-      <a href="/">Retirement Number</a>
-      <a href="when-can-i-retire">When Can I Retire?</a>
-      <a href="compound-interest-calculator">Compound Interest</a>
-      <a href="retirement-drawdown-calculator" class="active">Drawdown</a>
-      <a href="coast-fire-calculator">Coast FIRE</a>
-      <a href="four-percent-rule">4% Rule</a>
+      <a href="/" class="cta">Retirement Calculator</a>
+      <div class="dropdown">
+        <button class="dropdown-btn">Calculators</button>
+        <div class="dropdown-menu">
+          <a href="/">Retirement Number</a>
+          <a href="/when-can-i-retire">When Can I Retire?</a>
+          <a href="/retirement-drawdown-calculator">Drawdown Calculator</a>
+          <a href="/coast-fire-calculator">Coast FIRE Calculator</a>
+          <a href="/compound-interest-calculator">Compound Interest</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="dropdown-btn">Guides</button>
+        <div class="dropdown-menu">
+          <a href="/what-is-the-4-percent-rule">The 4% Rule Explained</a>
+          <a href="/how-much-to-retire">How Much Do You Need to Retire?</a>
+          <a href="/roth-vs-traditional">Roth vs Traditional</a>
+          <a href="/what-is-coast-fire">What Is Coast FIRE?</a>
+          <a href="/when-to-claim-social-security">When to Claim Social Security</a>
+          <a href="/sequence-of-returns-risk">Sequence of Returns Risk</a>
+          <a href="/four-percent-rule">4% Rule Calculator</a>
+        </div>
+      </div>
+      <a href="/about">About</a>
     </nav>
   </div>
 </header>
@@ -74,7 +109,15 @@
 <footer>
   <div class="footer-inner">
     <div>&copy; 2026 SimpleRetirementCalculators.com &middot; A <a href="https://swrltools.com">Swrl Tools</a> site</div>
-    <div><a href="about">About</a> &middot; <a href="contact">Contact</a> &middot; <a href="privacy-policy">Privacy</a></div>
+    <div><a href="/about">About</a> &middot; <a href="/contact">Contact</a> &middot; <a href="/privacy-policy">Privacy</a></div>
+  </div>
+  <div style="margin-top:12px;font-size:0.8rem;color:#888">
+    <a href="/what-is-the-4-percent-rule" style="color:#888;margin:0 6px">The 4% Rule</a>
+    <a href="/how-much-to-retire" style="color:#888;margin:0 6px">How Much to Retire</a>
+    <a href="/roth-vs-traditional" style="color:#888;margin:0 6px">Roth vs Traditional</a>
+    <a href="/what-is-coast-fire" style="color:#888;margin:0 6px">What Is Coast FIRE</a>
+    <a href="/when-to-claim-social-security" style="color:#888;margin:0 6px">Social Security Timing</a>
+    <a href="/sequence-of-returns-risk" style="color:#888;margin:0 6px">Sequence of Returns Risk</a>
   </div>
 </footer>
 <script>
